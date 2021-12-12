@@ -53,7 +53,7 @@ export function boot() : Promise<App> {
       resolve(false);
     }
     messagePromise.then(message => {message.text = html`${message.text}<br/>Storage available`});
-    config = getConfig();
+    config = await getConfig();
     messagePromise.then(message => {message.text = html`${message.text}<br/>Config loaded`});
 
     if (!webrtc.checkCapability()) {
