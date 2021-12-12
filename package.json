@@ -11,6 +11,8 @@
     "@material/mwc-top-app-bar": "^0.25.3",
     "@popperjs/core": "^2.11.0",
     "class-transformer": "^0.5.1",
+    "class-transformer-validator": "^0.9.1",
+    "class-validator": "^0.13.2",
     "lit": "^2.0.2",
     "lit-css-loader": "^1.2.1",
     "reflect-metadata": "^0.1.13",

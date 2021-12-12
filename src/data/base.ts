@@ -1,17 +1,19 @@
-import { plainToInstance, instanceToPlain, instanceToInstance, serialize, deserialize, deserializeArray  } from 'class-transformer';
+import { instanceToPlain, instanceToInstance, serialize  } from 'class-transformer';
+import { transformAndValidateSync } from "class-transformer-validator";
 
 export class Base {
+
   static getType<T extends typeof Base>(this: T): T {
     return this as T;
   }
   static fromObject(object: any) {
-    return plainToInstance(object, this.getType());
+    return transformAndValidateSync(this.getType(), object);
   }
   static fromJSON(json: string) {
-    return deserialize(this.getType(), json);
+    return transformAndValidateSync(this.getType(), json);
   }
   static multipleFromJSON(json: string) {
-    return deserializeArray(this.getType(), json);
+    return transformAndValidateSync(this.getType(), json);
   }
   toObject() {
     return instanceToPlain(this);
