@@ -1,76 +1,54 @@
-import {html} from "lit";
-import { getDb } from "../db";
+import { indexedDb } from "../db";
 import * as crypto from "../crypto";
 import * as storage from "../storage";
 import * as ui from "../ui";
-import * as webrtc from "../webrtc"
+import * as webrtc from "../webrtc";
+import * as worker from "../worker";
 import {getConfig} from "../flow";
 import {Config, App} from "../data";
 
 export function boot() : Promise<App> {
   console.log("Apllication startup")
+  let uiPromise = ui.init();
 
-  var dbType = 'indexedDb'; // TODO: Get this from the config
-  var dbHandle: IDBDatabase;
-  var uiHandle: ui.Body;
-  var config: Config;
+  let systemHealthyPromise = new Promise<any>((resolve, reject) => {
 
-  var systemHealthyPromise = new Promise<boolean>(async resolve => {
-    // Start the ui
-    var uiPromise = ui.init();
-    var messagePromise = new Promise<ui.Message>(resolve => {
-      uiPromise.then(uiHandle => {
-        var main = uiHandle.getChild('ui-main')
-        if (main) {
-          var message = main.addChild('ui-message');
-          message.heading = 'State'
-          message.text = html`Ui loaded`;
-          resolve(message)
-        }
-      });
+    let healthChecks = {
+      "indexedDB": indexedDb.checkCapability(),
+      "crypto": crypto.checkCapability(),
+      "storage": storage.checkCapability(),
+      "webrtc": webrtc.checkCapability(),
+      "webWorker": worker.checkCapability()
+    }
+
+    let overallHealth = true;
+    Object.values(healthChecks).forEach(health => {
+      if (!health) {
+        overallHealth = false;
+      }
     });
-
-    // Fire the database up
-    var dbModule = getDb(dbType);
-    if (!dbModule) {
-      console.error("DB " + dbType + " is not available!");
-      resolve(false);
+    if (overallHealth) {
+      resolve(healthChecks);
     }
-    var dbPromise = dbModule!.init('Test');
-    dbPromise.then(db => {
-      console.log("Database up and running")
-      messagePromise.then(message => {message.text = html`${message.text}<br/>Database running`});
-    });
-
-    // Check crypto
-    if (!crypto.checkCapability()) {
-      console.error("Crypto API is not available!");
-      resolve(false);
+    else {
+      reject(healthChecks);
     }
-    messagePromise.then(message => {message.text = html`${message.text}<br/>Crypto available`});
-    if (!storage.checkCapability()) {
-      console.error("Storage API is not available!");
-      resolve(false);
-    }
-    messagePromise.then(message => {message.text = html`${message.text}<br/>Storage available`});
-    config = await getConfig();
-    messagePromise.then(message => {message.text = html`${message.text}<br/>Config loaded`});
-
-    if (!webrtc.checkCapability()) {
-      console.error("No WebRTC available!")
-      resolve(false);
-    }
-    messagePromise.then(message => {message.text = html`${message.text}<br/>WebRTC available`});
-    dbHandle = await dbPromise;
-    uiHandle = await uiPromise;
-    resolve(true);
   });
 
-  var appPromise = new Promise<App>(resolve => {
-    systemHealthyPromise.then(healthy => {
+  let appPromise = new Promise<App>( async (resolve, reject) => {
+    systemHealthyPromise.then( async _health => {
+      let config: Config = await getConfig();
+      let uiHandle: ui.Body = await uiPromise;
+      let dbHandle: IDBDatabase = await indexedDb.init('Test');
       console.log("System is healthy and ready to go!");
-      resolve(new App(config, dbHandle, uiHandle))
+      resolve(new App(config, dbHandle, uiHandle));
     });
-  })
+    systemHealthyPromise.catch(health => {
+        console.error("System unable to boot!");
+        console.debug(health as string);
+        // TODO: Add ui message!
+        reject(new Error("Prerequisites not met. System unable to boot!"));
+    });
+  });
   return appPromise;
 }
