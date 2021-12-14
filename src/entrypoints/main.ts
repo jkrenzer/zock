@@ -4,7 +4,7 @@ import {App} from "../data";
 try {
   let appPromise: Promise<App> = boot();
 
-  appPromise.then(app => {
+  appPromise.then(_app => {
     // Let the fun begin
     console.log("Application is set up")
   })
