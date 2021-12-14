@@ -1,5 +1,5 @@
 export function checkCapability() : boolean {
-  if (!window.crypto.subtle) {
+  if (!window.crypto.subtle || !self.crypto) {
     return false;
   }
   else {
@@ -30,4 +30,14 @@ export function createEncryptionKeyPair() : Promise<CryptoKeyPair> {
     ["encrypt", "decrypt"]
   );
   return keyPair;
+}
+
+declare global {
+  interface Crypto {
+    randomUUID: () => string;
+  }
+}
+
+export function randomUUID() : string {
+  return self.crypto.randomUUID();
 }

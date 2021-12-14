@@ -9,5 +9,5 @@ function getRandomInt(max: number) {
 export async function createConfig() : Promise<Config> {
   let signingKeypair = await createSigningKeyPair();
   let encryptionKeypair = await createEncryptionKeyPair();
-  return new Config(getRandomInt(65000), signingKeypair, encryptionKeypair);
+  return new Config(signingKeypair, encryptionKeypair);
 }

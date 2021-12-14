@@ -1,18 +1,19 @@
 import {Base} from './base';
-import {IsInt, IsPositive, IsDefined} from 'class-validator';
+import {IsUUID, IsDefined} from 'class-validator';
+import {randomUUID} from '../crypto';
+
 export class Config extends Base {
   version: number = 2;
-  @IsInt()
-  @IsPositive()
-  id: number;
+  @IsUUID('4')
+  id: string;
   @IsDefined()
   encryptionKeypair: CryptoKeyPair;
   @IsDefined()
   signingKeyPair: CryptoKeyPair;
 
-  constructor(id: number, skp: CryptoKeyPair, ekp: CryptoKeyPair) {
+  constructor(skp: CryptoKeyPair, ekp: CryptoKeyPair) {
     super();
-    this.id = id;
+    this.id = randomUUID();
     this.signingKeyPair = skp;
     this.encryptionKeypair = ekp;
   }
