@@ -7,7 +7,7 @@ declare global {
   }
 }
 export function checkCapability() : boolean {
-  var webRTCSupport = navigator.getUserMedia ||
+  let webRTCSupport = navigator.getUserMedia ||
         navigator.webkitGetUserMedia ||
         navigator.mozGetUserMedia ||
         navigator.msGetUserMedia ||

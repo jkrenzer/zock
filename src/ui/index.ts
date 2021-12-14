@@ -15,7 +15,7 @@ export {
 };
 
 export function init() : Promise<Body> {
-  var uiPromise = new Promise<Body>(resolve => {
+  let uiPromise = new Promise<Body>(resolve => {
     const stage = document.createElement('ui-body');
     document.body.appendChild(stage);
     // Done rendering the ui

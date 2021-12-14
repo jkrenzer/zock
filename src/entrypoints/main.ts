@@ -2,7 +2,7 @@ import {boot} from "../app";
 import {App} from "../data";
 
 try {
-  var appPromise: Promise<App> = boot();
+  let appPromise: Promise<App> = boot();
 
   appPromise.then(app => {
     // Let the fun begin

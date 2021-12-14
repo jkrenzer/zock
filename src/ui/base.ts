@@ -17,7 +17,7 @@ export class Base extends LitElement {
   }
 
   getChild(tag: string) {
-    var child: any =  this.shadowRoot!.querySelector(tag);
+    let child: any =  this.shadowRoot!.querySelector(tag);
     return child;
   }
 }
